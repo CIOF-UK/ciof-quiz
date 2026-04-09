@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fact or Fiction? — CIOF Fundraising Quiz</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+      font-size: 16px;
+      line-height: 1.7;
+      color: #1a1a1a;
+      background: #f5f5f3;
+      padding: 2rem 1rem;
+    }
+
+    .quiz-wrap {
+      max-width: 640px;
+      margin: 0 auto;
+    }
+
+    .quiz-header {
+      margin-bottom: 2rem;
+    }
+
+    .quiz-header h1 {
+      font-size: 22px;
+      font-weight: 500;
+      color: #1a1a1a;
+      margin-bottom: 0.25rem;
+    }
+
+    .quiz-header p {
+      font-size: 14px;
+      color: #666;
+    }
+
+    .progress-bar {
+      height: 4px;
+      background: #e0e0e0;
+      border-radius: 2px;
+      margin-bottom: 1.5rem;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: #0057a8;
+      border-radius: 2px;
+      transition: width 0.4s ease;
+    }
+
+    .q-counter {
+      font-size: 13px;
+      color: #666;
+      margin-bottom: 0.75rem;
+    }
+
+    .card {
+      background: #fff;
+      border: 0.5px solid rgba(0,0,0,0.12);
+      border-radius: 12px;
+      padding: 1.75rem;
+      margin-bottom: 1rem;
+    }
+
+    .topic-badge {
+      display: inline-block;
+      font-size: 12px;
+      padding: 3px 10px;
+      border-radius: 6px;
+      background: #e8f1fb;
+      color: #0057a8;
+      margin-bottom: 1rem;
+    }
+
+    .statement {
+      font-size: 18px;
+      font-weight: 500;
+      color: #1a1a1a;
+      line-height: 1.5;
+      margin: 0 0 1.5rem;
+    }
+
+    .btn-row {
+      display: flex;
+      gap: 12px;
+    }
+
+    .btn-choice {
+      flex: 1;
+      padding: 0.75rem;
+      border-radius: 8px;
+      border: 0.5px solid rgba(0,0,0,0.2);
+      background: transparent;
+      color: #1a1a1a;
+      font-size: 15px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.15s, border-color 0.15s;
+      font-family: inherit;
+    }
+
+    .btn-choice:hover:not(:disabled) {
+      background: #f5f5f3;
+    }
+
+    .btn-choice:disabled {
+      cursor: default;
+    }
+
+    .selected-correct {
+      background: #eaf6ee !important;
+      border-color: #2e7d4f !important;
+      color: #2e7d4f !important;
+    }
+
+    .selected-wrong {
+      background: #fdecea !important;
+      border-color: #c0392b !important;
+      color: #c0392b !important;
+    }
+
+    .reveal-correct {
+      border-color: #2e7d4f !important;
+      color: #2e7d4f !important;
+    }
+
+    .reveal {
+      margin-top: 1.25rem;
+      padding-top: 1.25rem;
+      border-top: 0.5px solid rgba(0,0,0,0.1);
+      display: none;
+    }
+
+    .verdict {
+      font-size: 13px;
+      font-weight: 500;
+      margin-bottom: 0.5rem;
+    }
+
+    .verdict.fact { color: #2e7d4f; }
+    .verdict.fiction { color: #c0392b; }
+
+    .explain {
+      font-size: 14px;
+      color: #555;
+      line-height: 1.6;
+      margin: 0 0 0.75rem;
+    }
+
+    .resource-link {
+      font-size: 13px;
+      color: #0057a8;
+      text-decoration: none;
+    }
+
+    .resource-link:hover {
+      text-decoration: underline;
+    }
+
+    .btn-next {
+      display: none;
+      width: 100%;
+      padding: 0.75rem;
+      border-radius: 8px;
+      border: 0.5px solid rgba(0,0,0,0.2);
+      background: transparent;
+      color: #1a1a1a;
+      font-size: 15px;
+      cursor: pointer;
+      font-family: inherit;
+      transition: background 0.15s;
+    }
+
+    .btn-next:hover {
+      background: #ebebeb;
+    }
+
+    .result-card {
+      background: #fff;
+      border: 0.5px solid rgba(0,0,0,0.12);
+      border-radius: 12px;
+      padding: 2.5rem 2rem;
+      text-align: center;
+    }
+
+    .score-label {
+      font-size: 14px;
+      color: #666;
+    }
+
+    .score-big {
+      font-size: 56px;
+      font-weight: 500;
+      color: #1a1a1a;
+      line-height: 1;
+      margin: 0.5rem 0;
+    }
+
+    .score-msg {
+      font-size: 15px;
+      color: #1a1a1a;
+      margin: 1.25rem 0 1rem;
+      line-height: 1.6;
+    }
+
+    .score-row {
+      display: flex;
+      justify-content: center;
+      gap: 6px;
+      margin: 1rem 0;
+      flex-wrap: wrap;
+    }
+
+    .score-pip {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+    }
+
+    .pip-correct { background: #eaf6ee; color: #2e7d4f; }
+    .pip-wrong { background: #fdecea; color: #c0392b; }
+
+    .share-label {
+      font-size: 13px;
+      color: #666;
+      margin: 1.5rem 0 0.75rem;
+    }
+
+    .share-row {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 1.5rem;
+    }
+
+    .share-btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 0.6rem 1.1rem;
+      border-radius: 8px;
+      border: 0.5px solid rgba(0,0,0,0.2);
+      background: transparent;
+      color: #1a1a1a;
+      font-size: 14px;
+      cursor: pointer;
+      text-decoration: none;
+      transition: background 0.15s;
+      font-family: inherit;
+    }
+
+    .share-btn:hover {
+      background: #f5f5f3;
+    }
+
+    .share-icon {
+      width: 18px;
+      height: 18px;
+      flex-shrink: 0;
+    }
+
+    .btn-restart {
+      padding: 0.75rem 2rem;
+      border-radius: 8px;
+      border: 0.5px solid rgba(0,0,0,0.2);
+      background: transparent;
+      color: #1a1a1a;
+      font-size: 15px;
+      cursor: pointer;
+      font-family: inherit;
+      transition: background 0.15s;
+    }
+
+    .btn-restart:hover {
+      background: #f5f5f3;
+    }
+
+    @media (max-width: 480px) {
+      .statement { font-size: 16px; }
+      .result-card { padding: 1.75rem 1.25rem; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="quiz-wrap">
+  <div class="quiz-header">
+    <h1>Fact or Fiction?</h1>
+    <p>Test your fundraising knowledge — 10 questions, instant feedback.</p>
+  </div>
+
+  <div id="quiz-screen">
+    <div class="progress-bar"><div class="progress-fill" id="progress" style="width:0%"></div></div>
+    <div class="q-counter" id="counter">Question 1 of 10</div>
+    <div class="card">
+      <div class="topic-badge" id="topic"></div>
+      <p class="statement" id="statement"></p>
+      <div class="btn-row">
+        <button class="btn-choice" id="btn-fact" onclick="answer('fact')">Fact</button>
+        <button class="btn-choice" id="btn-fiction" onclick="answer('fiction')">Fiction</button>
+      </div>
+      <div class="reveal" id="reveal">
+        <p class="verdict" id="verdict"></p>
+        <p class="explain" id="explain"></p>
+        <a class="resource-link" id="resource-link" href="#" target="_blank" rel="noopener"></a>
+      </div>
+    </div>
+    <button class="btn-next" id="btn-next" onclick="nextQuestion()">Next question →</button>
+  </div>
+
+  <div id="result-screen" style="display:none">
+    <div class="result-card">
+      <p class="score-label">Your score</p>
+      <p class="score-big" id="score-big"></p>
+      <p class="score-label">out of 10</p>
+      <div class="score-row" id="score-pips"></div>
+      <p class="score-msg" id="score-msg"></p>
+      <p class="share-label">Share your result</p>
+      <div class="share-row">
+        <a id="share-linkedin" class="share-btn" href="#" target="_blank" rel="noopener">
+          <svg class="share-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+          LinkedIn
+        </a>
+        <a id="share-facebook" class="share-btn" href="#" target="_blank" rel="noopener">
+          <svg class="share-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+          Facebook
+        </a>
+      </div>
+      <button class="btn-restart" onclick="restart()">Try again</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  /* ── UPDATE THIS URL when the page goes live ── */
+  const QUIZ_URL = 'https://www.ciof.org.uk/YOUR-QUIZ-PAGE';
+
+  const questions = [
+    {
+      topic: "AI and fundraising",
+      statement: "You can trust the outputs of AI when you have given it documents to work from.",
+      answer: "fiction",
+      explanation: "You should always check what the outputs are, that they reflect the prompt that you gave the AI, and that it hasn't misinterpreted or made up information. There are a lot of ways to use AI and to do it safely, ethically and responsibly.",
+      resource: "https://ciof.org.uk/library/fundraising-collections/the-ai-and-fundraising-collection/"
+    },
+    {
+      topic: "Fundraising careers",
+      statement: "Once you've got a fundraising job, you don't need to do any training or development.",
+      answer: "fiction",
+      explanation: "Lifelong learning helps you to continue growing in your professional and personal development.",
+      resource: "https://ciof.org.uk/library/fundraising-collections/the-fundraising-careers-collection/"
+    },
+    {
+      topic: "Creativity in fundraising",
+      statement: "It is possible for fundraisers to use user-generated content that is good quality, ethical, respectful, and effective.",
+      answer: "fact",
+      explanation: "User-generated content, when approached carefully, can be a truly authentic and meaningful way to support your fundraising activities.",
+      resource: "https://ciof.org.uk/library/fundraising-collections/the-creativity-in-fundraising-collection/"
+    },
+    {
+      topic: "Fundraising essentials",
+      statement: "Having a well-crafted fundraising strategy ensures that you can secure the vital funds needed to make a lasting difference in the community you serve.",
+      answer: "fact",
+      explanation: "A strong fundraising strategy provides focus, direction, and a clear plan of action. It helps small charities prioritise efforts, allocate resources effectively, and measure progress.",
+      resource: "https://ciof.org.uk/library/fundraising-collections/the-fundraising-essentials-collection/"
+    },
+    {
+      topic: "Advocacy",
+      statement: "Trying to engage with our local MP is not going to be worth our time.",
+      answer: "fiction",
+      explanation: "If you can engage with your MP, it can help them to understand how they can champion local charities, shape a supportive fundraising environment, and use their influence to raise awareness of accessible giving opportunities.",
+      resource: "https://ciof.org.uk/library/fundraising-collections/the-fundraising-guides-and-reports-collection/"
+    },
+    {
+      topic: "Income diversification",
+      statement: "It's OK to focus on just one fundraising income stream.",
+      answer: "fiction",
+      explanation: "Whilst it's good to have one strong, reliable income stream, it's important to have a variety of ways to generate funds.",
+      resource: "https://ciof.org.uk/library/fundraising-collections/the-fundraising-leaders-collection/"
+    },
+    {
+      topic: "Law and regulation",
+      statement: "All fundraisers need to understand fundraising law and regulation.",
+      answer: "fact",
+      explanation: "You don't need to know the details of every piece of legislation or regulation, but you do need to know the basics to keep your fundraising legal.",
+      resource: "https://ciof.org.uk/library/fundraising-collections/the-policy-regulation-collection/"
+    },
+    {
+      topic: "Volunteering",
+      statement: "It's OK to let fundraising volunteers do what they like without any support from our charity.",
+      answer: "fiction",
+      explanation: "Volunteers can be amazing ambassadors for your charity. Engaging with them and supporting them will strengthen their relationship with your cause, and you can make sure any fundraising they are doing is legal and safe.",
+      resource: "https://ciof.org.uk/library/fundraising-collections/the-volunteering-and-fundraising-collection/"
+    },
+    {
+      topic: "Fundraiser wellbeing",
+      statement: "As a fundraiser I can access free 24/7 mental health support from trained professionals.",
+      answer: "fact",
+      explanation: "As part of your CIOF membership you can get free and confidential emotional, wellbeing, bereavement and legal support.",
+      resource: "https://ciof.org.uk/library/fundraising-collections/the-fundraiser-wellbeing-collection/"
+    },
+    {
+      topic: "Small charities",
+      statement: "Charity of the Year partnerships are just for big, national charities.",
+      answer: "fiction",
+      explanation: "Charity of the Year partnerships can be accessed by charities of all sizes — you just need to be selective about what partnerships your charity applies for.",
+      resource: "https://ciof.org.uk/library/fundraising-collections/the-small-charities-collection/"
+    }
+  ];
+
+  let current = 0, score = 0, results = [], answered = false;
+
+  function render() {
+    const q = questions[current];
+    document.getElementById('progress').style.width = (current / questions.length * 100) + '%';
+    document.getElementById('counter').textContent = 'Question ' + (current + 1) + ' of ' + questions.length;
+    document.getElementById('topic').textContent = q.topic;
+    document.getElementById('statement').textContent = q.statement;
+    document.getElementById('reveal').style.display = 'none';
+    document.getElementById('btn-next').style.display = 'none';
+    document.getElementById('btn-fact').className = 'btn-choice';
+    document.getElementById('btn-fiction').className = 'btn-choice';
+    document.getElementById('btn-fact').disabled = false;
+    document.getElementById('btn-fiction').disabled = false;
+    answered = false;
+  }
+
+  function answer(choice) {
+    if (answered) return;
+    answered = true;
+    const q = questions[current];
+    const correct = choice === q.answer;
+    if (correct) score++;
+    results.push(correct);
+    const bf = document.getElementById('btn-fact');
+    const bfi = document.getElementById('btn-fiction');
+    bf.disabled = true;
+    bfi.disabled = true;
+    const chosen = choice === 'fact' ? bf : bfi;
+    const other = choice === 'fact' ? bfi : bf;
+    chosen.className = 'btn-choice ' + (correct ? 'selected-correct' : 'selected-wrong');
+    if (!correct) other.className = 'btn-choice reveal-correct';
+    const verdict = document.getElementById('verdict');
+    verdict.textContent = q.answer === 'fact' ? 'Fact' : 'Fiction';
+    verdict.className = 'verdict ' + q.answer;
+    document.getElementById('explain').textContent = q.explanation;
+    const rl = document.getElementById('resource-link');
+    if (q.resource) {
+      rl.href = q.resource;
+      rl.textContent = 'Explore this topic on CIOF →';
+      rl.style.display = 'inline';
+    } else {
+      rl.style.display = 'none';
+    }
+    document.getElementById('reveal').style.display = 'block';
+    document.getElementById('btn-next').style.display = 'block';
+    document.getElementById('btn-next').textContent = current < questions.length - 1 ? 'Next question →' : 'See my results →';
+  }
+
+  function nextQuestion() {
+    current++;
+    if (current >= questions.length) showResult();
+    else render();
+  }
+
+  function getShareText(s) {
+    if (s === 10) return "I scored 10/10 on the CIOF Fact or Fiction fundraising quiz! Think you can match it? Test your knowledge here:";
+    if (s >= 8)  return "I scored " + s + "/10 on the CIOF Fact or Fiction fundraising quiz. How well do you know your fundraising facts? Find out here:";
+    if (s >= 6)  return "I just tested my fundraising knowledge with the CIOF Fact or Fiction quiz and scored " + s + "/10. Give it a go:";
+    return "Just taken the CIOF Fact or Fiction fundraising quiz — these questions are trickier than they look! Have a go yourself:";
+  }
+
+  function showResult() {
+    document.getElementById('quiz-screen').style.display = 'none';
+    document.getElementById('result-screen').style.display = 'block';
+    document.getElementById('score-big').textContent = score;
+    const pips = document.getElementById('score-pips');
+    pips.innerHTML = results.map(r =>
+      '<div class="score-pip ' + (r ? 'pip-correct' : 'pip-wrong') + '">' + (r ? '✓' : '✗') + '</div>'
+    ).join('');
+    let msg;
+    if (score === 10) msg = "Full marks — you clearly know your stuff. Why not share this quiz with a colleague and see how they get on?";
+    else if (score >= 8) msg = "Really strong result. Take a look at the explanations for any you missed — there are some useful resources linked from each one.";
+    else if (score >= 6) msg = "Good effort. A few of these are genuinely tricky — the explanations are worth revisiting, and each one links through to a CIOF collection if you want to go deeper.";
+    else if (score >= 4) msg = "Some good instincts in there. Fundraising is full of nuance — explore the linked CIOF collections to build your knowledge further.";
+    else msg = "Don't worry — these are designed to make you think. Review the explanations and follow the links to our collections to find out more.";
+    document.getElementById('score-msg').textContent = msg;
+    const shareText = getShareText(score);
+    const encodedUrl = encodeURIComponent(QUIZ_URL);
+    const encodedSummary = encodeURIComponent(shareText);
+    document.getElementById('share-linkedin').href =
+      'https://www.linkedin.com/sharing/share-offsite/?url=' + encodedUrl + '&summary=' + encodedSummary;
+    document.getElementById('share-facebook').href =
+      'https://www.facebook.com/sharer/sharer.php?u=' + encodedUrl + '&quote=' + encodedSummary;
+  }
+
+  function restart() {
+    current = 0; score = 0; results = [];
+    document.getElementById('result-screen').style.display = 'none';
+    document.getElementById('quiz-screen').style.display = 'block';
+    render();
+  }
+
+  render();
+</script>
+
+</body>
+</html>
